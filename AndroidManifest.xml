@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.info.st.smartcart"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+	        android:name="com.info.st.activities.StoreItemListActivity"
+	        android:label="@string/title_store_item_list"
+	        android:parentActivityName="com.info.st.smartcart.MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="com.info.st.smartcart.MainActivity" />
+	    </activity>
+	    <activity
+	        android:name="com.info.st.activities.ItemDetailsActivity"
+	        android:label="@string/title_item_details_activity"
+	        android:parentActivityName="com.info.st.smartcart.MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="com.info.st.smartcart.MainActivity" />
+	    </activity>
+    </application>
+
+</manifest>
