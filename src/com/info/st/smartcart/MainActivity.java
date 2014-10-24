@@ -3,15 +3,19 @@ package com.info.st.smartcart;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import com.info.st.activities.SelectItemGridActivity;
+import com.info.st.activities.StoreItemListActivity;
 import com.info.st.adapters.TablistAdapter;
 import com.info.st.data.aggregators.ItemAggregator;
 import com.info.st.data.aggregators.StoreAggregator;
-import com.info.st.fragments.MainTabFragment;
-import com.info.st.fragments.StoreItemsFragment;
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 
@@ -91,6 +95,41 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	@Override
 	public void onTabUnselected(Tab arg0, FragmentTransaction arg1) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    // Inflate the menu items for use in the action bar
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.main_activity_actions, menu);
+	    return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+//		System.out.println("*******************Menu Item Id" + (item.getItemId() == R.id.action_add_item ));
+//		return super.onOptionsItemSelected(item);
+	    // Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.action_add_item:
+	        	startAddItemActivity();
+	            return true;
+	        case R.id.action_add_store:
+	        	startAddStoreActivity();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	private void startAddItemActivity () {
+		Intent itemGridIntent = new Intent(this, SelectItemGridActivity.class);
+		startActivity(itemGridIntent);
+		
+	}
+	
+	private void startAddStoreActivity () {
 		
 	}
 	

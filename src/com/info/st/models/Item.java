@@ -1,18 +1,26 @@
 package com.info.st.models;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Item implements Serializable{
 	private String name;
 	private int icon;
-	private float quantity;
+	private String quantity;
 	private Store store;
 	private double price;
 	private String note;
+	private boolean purchaseState; //true -- item purchased
+								   //false -- Need to purchase
+	private Date dueDateTime;
+	private QuantityMeasure measure;
+	
+	public enum QuantityMeasure{
+		LB, OUNCE, KG, GRAM, GALON, LITER, MILLI_LITER, ITEMS, KILO_METER, METER, MILLI_METER, MILE, YARD, INCH
+	}
 	
 	
-	
-	public Item(String name, int icon, float quantity, Store store, double price, String note) {
+	public Item(String name, int icon, String quantity, Store store, double price, String note, boolean purchaseState, Date dueDateTime, QuantityMeasure measure ) {
 		super();
 		this.name = name;
 		this.icon = icon;
@@ -20,6 +28,9 @@ public class Item implements Serializable{
 		this.store = store;
 		this.price = price;
 		this.note = note;
+		this.purchaseState = purchaseState;
+		this.dueDateTime = dueDateTime;
+		this.measure = measure;
 	}
 	
 	
@@ -35,10 +46,10 @@ public class Item implements Serializable{
 	public void setIcon(int icon) {
 		this.icon = icon;
 	}
-	public float getQuantity() {
+	public String getQuantity() {
 		return quantity;
 	}
-	public void setQuantity(float quantity) {
+	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
 	public Store getStore() {
@@ -63,6 +74,45 @@ public class Item implements Serializable{
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+	
+
+	public boolean isPurchaseState() {
+		return purchaseState;
+	}
+
+
+	public void setPurchaseState(boolean purchaseState) {
+		this.purchaseState = purchaseState;
+	}	
+	
+	
+	public Date getDueDateTime() {
+		return dueDateTime;
+	}
+
+
+	public void setDueDateTime(Date dueDateTime) {
+		this.dueDateTime = dueDateTime;
+	}
+
+
+	public QuantityMeasure getMeasure() {
+		return measure;
+	}
+
+
+	public void setMeasure(QuantityMeasure measure) {
+		this.measure = measure;
+	}
+
+
+	public void togglePurchaseState() {
+		if (this.purchaseState == true) {
+			this.purchaseState = false;
+		} else {
+			this.purchaseState = true;
+		}
 	}
 
 

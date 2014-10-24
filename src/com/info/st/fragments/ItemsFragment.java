@@ -1,7 +1,5 @@
 package com.info.st.fragments;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import android.content.Intent;
@@ -11,15 +9,13 @@ import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.info.st.activities.ItemDetailsActivity;
-import com.info.st.activities.StoreItemListActivity;
 import com.info.st.adapters.ItemListAdapter;
-import com.info.st.adapters.StoreListAdapter;
-import com.info.st.data.aggregators.StoreAggregator;
 import com.info.st.models.Item;
-import com.info.st.models.Store;
 import com.info.st.smartcart.R;
 
 
@@ -29,7 +25,7 @@ import com.info.st.smartcart.R;
  * create an instance of this fragment.
  *
  */
-public class ItemsFragment extends ListFragment implements MainTabFragment {
+public class ItemsFragment extends ListFragment implements MainTabFragment, OnItemLongClickListener, OnItemClickListener {
 	List<Item> items;
 	
 	public ItemsFragment(List<Item> items) {
@@ -42,7 +38,9 @@ public class ItemsFragment extends ListFragment implements MainTabFragment {
 	    super.onActivityCreated(savedInstanceState);
 //	    List<Item> displayItems = (List<Item>)getActivity().getIntent().getExtras().get("DisplayItems");
 		ItemListAdapter adapter = new ItemListAdapter(getActivity(), items);
-	    setListAdapter(adapter);
+	    setListAdapter(adapter);	    
+	    getListView().setOnItemLongClickListener(this);
+	    getListView().setOnItemClickListener(this);
 	}
 	
 	@Override
@@ -54,8 +52,20 @@ public class ItemsFragment extends ListFragment implements MainTabFragment {
 	}
 
 	
+//	@Override
+//	public void onListItemClick(ListView l, View v, int position, long id) {
+//		Item selectedIem = this.items.get(position);
+//		Bundle bundle = new Bundle();
+//		bundle.putSerializable("SelectedItem", selectedIem);
+//		
+//		Intent itemDetailsIntent = new Intent(getActivity(), ItemDetailsActivity.class);	
+//		itemDetailsIntent.putExtras(bundle);
+//		startActivity(itemDetailsIntent);
+//	}
+
 	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
+	public boolean onItemLongClick(AdapterView<?> viewGroup, View view, int position, long id) {
+		System.out.println("####################long click");
 		Item selectedIem = this.items.get(position);
 		Bundle bundle = new Bundle();
 		bundle.putSerializable("SelectedItem", selectedIem);
@@ -63,7 +73,26 @@ public class ItemsFragment extends ListFragment implements MainTabFragment {
 		Intent itemDetailsIntent = new Intent(getActivity(), ItemDetailsActivity.class);	
 		itemDetailsIntent.putExtras(bundle);
 		startActivity(itemDetailsIntent);
+		return true;
 	}
+
+	@Override
+	public void onItemClick(AdapterView<?> viewGroup, View view, int position, long id) {
+		// TODO Auto-generated method stub
+		System.out.println("*************************click");
+		((ItemListAdapter)getListAdapter()).getItem(position).togglePurchaseState();
+		((ItemListAdapter)getListAdapter()).notifyDataSetChanged();
+//		getListView().removeViewAt(position);
+//		getListView().addView(view);
+//		Item selectedIem = this.items.get(position);
+//		Bundle bundle = new Bundle();
+//		bundle.putSerializable("SelectedItem", selectedIem);
+//		
+//		Intent itemDetailsIntent = new Intent(getActivity(), ItemDetailsActivity.class);	
+//		itemDetailsIntent.putExtras(bundle);
+//		startActivity(itemDetailsIntent);
+	}
+	
 
 
 }

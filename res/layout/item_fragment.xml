@@ -23,5 +23,17 @@
         android:layout_marginTop="10dp" >
     </TextView>
     
+    <CheckBox
+        android:id="@+id/itempurchasesate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="4px"
+        android:layout_marginRight="10px" 
+        android:focusable="false"
+        android:focusableInTouchMode="false">
+    </CheckBox>
+    
+    
 </RelativeLayout> 
 

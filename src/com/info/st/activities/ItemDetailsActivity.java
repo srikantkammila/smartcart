@@ -22,7 +22,7 @@ public class ItemDetailsActivity extends Activity{
 		name.setText(selectedItem.getName());
 		note.setText(selectedItem.getNote());
 		price.setText(Double.toString(selectedItem.getPrice()));
-		quantity.setText(Float.toString(selectedItem.getQuantity()));
+		quantity.setText(selectedItem.getQuantity());
 		setTitle(selectedItem.getName());
 	}
 
