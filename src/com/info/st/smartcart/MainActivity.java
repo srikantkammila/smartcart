@@ -40,7 +40,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 //        Bundle bundle = new Bundle();
 //        bundle.putSerializable("DisplayStores", (ArrayList<Store>)storeAg.getInitStores());
         
-        ItemAggregator itemAg = new ItemAggregator();
+        ItemAggregator itemAg = ItemAggregator.getInstance();
 //        bundle.putSerializable("DisplayItems", (ArrayList<Item>)itemAg.getInitItems());
 //        getIntent().putExtras(bundle);
         

@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.info.st.data.aggregators.ItemHistoryAggregator;
 import com.info.st.models.Item;
 import com.info.st.smartcart.R;
 
@@ -55,7 +56,7 @@ public class ItemGridAdapter extends BaseAdapter {
 			// set value into textview
 			TextView textView = (TextView) gridView
 					.findViewById(R.id.grid_item_label);
-			String itemName = items.get(position).getName();
+			String itemName = this.items.get(position).getName();
 			// set image based on selected text
 			ImageView imageView = (ImageView) gridView.findViewById(R.id.grid_item_image);
 			if ("${#New#}$".equals(itemName)) {
@@ -66,18 +67,12 @@ public class ItemGridAdapter extends BaseAdapter {
 				textView.setText(itemName);
 				imageView.setImageResource(items.get(position).getIcon());
 			}
-			
-
-			
-			
-			
-
-
 		} else {
 			gridView = (View) convertView;
 		}
 
 		return gridView;
 	}
+	
 
 }

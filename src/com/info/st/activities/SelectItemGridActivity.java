@@ -11,7 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.info.st.adapters.ItemGridAdapter;
+import com.info.st.data.aggregators.ItemAggregator;
 import com.info.st.data.aggregators.ItemHistoryAggregator;
+import com.info.st.models.Item;
 import com.info.st.smartcart.R;
 
 public class SelectItemGridActivity extends Activity implements OnItemClickListener{
@@ -25,7 +27,7 @@ public class SelectItemGridActivity extends Activity implements OnItemClickListe
  
 		gridView = (GridView) findViewById(R.id.itemsgridview);
  
-		gridView.setAdapter(new ItemGridAdapter(this, new ItemHistoryAggregator().getItems()));
+		gridView.setAdapter(new ItemGridAdapter(this, ItemHistoryAggregator.getInstance().getItems()));
  
 		gridView.setOnItemClickListener(this);
 
@@ -34,9 +36,9 @@ public class SelectItemGridActivity extends Activity implements OnItemClickListe
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		if (view.getTag().equals("${#New#}$")) {
+		if (view.getTag() != null && view.getTag().equals("${#New#}$")) {
 			//new Item activity
-			Intent itemGridIntent = new Intent(this, CreateEditItemActivity.class);
+			Intent itemGridIntent = new Intent(this, ItemDetailsActivity.class);
 			startActivity(itemGridIntent);
 			
 		} else {
@@ -44,8 +46,16 @@ public class SelectItemGridActivity extends Activity implements OnItemClickListe
 					   .getText() + " added to cart";
 			Toast.makeText(
 			   getApplicationContext(), displayMsg, Toast.LENGTH_LONG).show();
+			Item item = ItemHistoryAggregator.getInstance().getItems().get(position);
+			ItemAggregator.getInstance().addItem(item);
 		}
 		
 
+	}
+	
+	@Override
+	protected void onResume() {		
+		super.onResume();
+		this.onCreate(null);
 	}
 }

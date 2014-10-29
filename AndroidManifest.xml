@@ -32,13 +32,34 @@
 	            android:value="com.info.st.smartcart.MainActivity" />
 	    </activity>
 	    <activity
-	        android:name="com.info.st.activities.ItemDetailsActivity"
+	        android:name="com.info.st.activities.ItemDetailsActivity1"
 	        android:label="@string/title_item_details_activity"
 	        android:parentActivityName="com.info.st.smartcart.MainActivity" >
 	        <meta-data
 	            android:name="android.support.PARENT_ACTIVITY"
 	            android:value="com.info.st.smartcart.MainActivity" />
 	    </activity>
+	    <activity
+	        android:name="com.info.st.activities.SelectItemGridActivity"
+	        android:label="@string/title_select_item_grid_activity"
+	        android:parentActivityName="com.info.st.smartcart.MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="com.info.st.smartcart.MainActivity" />
+	    </activity>
+	    <activity
+	        android:name="com.info.st.activities.ItemDetailsActivity"
+	        android:label="@string/title_edit_item_details_activity"
+	        android:parentActivityName="com.info.st.activities.SelectItemGridActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="ccom.info.st.activities.SelectItemGridActivity" />
+	    </activity>
+	    
+	    <provider
+            android:name="com.info.st.persistence.CartItemsContentProvider"
+            android:authorities="com.info.st.smartcart.items.contentprovider" >
+        </provider>
     </application>
 
 </manifest>

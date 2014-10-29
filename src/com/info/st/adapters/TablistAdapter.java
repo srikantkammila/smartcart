@@ -5,11 +5,8 @@ import java.util.List;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.info.st.fragments.ItemsFragment;
-import com.info.st.fragments.MainTabFragment;
-import com.info.st.fragments.StoreItemsFragment;
 import com.info.st.fragments.StoresFragment;
 import com.info.st.models.Item;
 import com.info.st.models.Store;

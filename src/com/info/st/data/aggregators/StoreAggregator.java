@@ -22,7 +22,7 @@ public class StoreAggregator implements Serializable{
 		this.initStores = new ArrayList<Store>();
 		for (String store : storeList) {
 			Store st = new Store(store, R.drawable.ic_launcher, "", "Active");
-			st.setStoreItems(new ItemAggregator().getInitItems());
+			st.setStoreItems(ItemAggregator.getInstance().getInitItems());
 			initStores.add(st);
 		}
 		

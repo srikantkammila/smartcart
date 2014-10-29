@@ -110,11 +110,18 @@ public class ItemListAdapter extends BaseAdapter {
 		return values.indexOf(getItem(position));
 	}
 	
-	@Override
-	public void notifyDataSetChanged() {
-		Collections.sort(values, new ItemComparator());
+	public void notifyDataSetChanged(int selectedPosition) {
+		Item selectedIem = this.values.get(selectedPosition);
+		ItemComparator comp = new ItemComparator(selectedIem);
+		Collections.sort(values, comp);
 		super.notifyDataSetChanged();
 	}
+	
+//	@Override
+//	public void notifyDataSetChanged() {
+//		Collections.sort(values, new ItemComparator());
+//		super.notifyDataSetChanged();
+//	}
 	
 	
 

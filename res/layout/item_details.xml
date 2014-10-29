@@ -1,35 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemdetails"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
     
-    <TextView 
-        android:id="@+id/itemname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginTop="10dp"/>
-    <TextView
-        android:id="@+id/itemnote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginTop="10dp"/>
-    <TextView 
-        android:id="@+id/itemprice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginTop="10dp"/>
+    <LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+	    <ImageView
+            android:id="@+id/itemimage"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/ic_launcher" />
+	    <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical">
+		    <AutoCompleteTextView android:id="@+id/itemname"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:hint="@string/itemname" 
+		        android:inputType="textPersonName"/>
+		    <AutoCompleteTextView android:id="@+id/itemnote"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:hint="@string/itemnote" />
+		</LinearLayout>
+    </LinearLayout>
     
-    <TextView 
-        android:id="@+id/itemquantity"
+    <LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+    
+	    <AutoCompleteTextView android:id="@+id/itemquantity"
+			        android:layout_width="100dp"
+			        android:layout_height="wrap_content"
+			        android:hint="@string/itemquantity" />
+	    
+	    <Spinner
+	        android:id="@+id/quantitymeasure"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+        	android:prompt="@string/quantity_measure_prompt">
+
+	    </Spinner>
+	</LinearLayout>
+	
+    <LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+	    
+	    <EditText
+	        android:id="@+id/itemduedate"
+	        android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:hint="@string/itemduedate"
+			android:focusable= "false" >
+		    <requestFocus></requestFocus>
+		</EditText>
+	</LinearLayout>
+
+    <LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+    
+	    <TextView 
+	        android:layout_width="100dp"
+	        android:textSize="20sp"
+	        android:layout_marginLeft="10dp"
+	        android:textColor="#ffffff"
+	        android:layout_height="wrap_content"
+	        android:hint="@string/store" />
+	    
+	    <Spinner
+	        android:id="@+id/storespinner"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+        	android:prompt="@string/quantity_measure_prompt">
+
+	    </Spinner>
+	</LinearLayout>
+    <Button
+        android:id="@+id/button_add_update"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginTop="10dp"/>
-    
-	
-	
+        android:text="@string/add" />
+
 </LinearLayout>

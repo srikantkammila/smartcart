@@ -2,8 +2,11 @@ package com.info.st.models;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 public class Item implements Serializable{
+	
+	private UUID id;
 	private String name;
 	private int icon;
 	private String quantity;
@@ -15,13 +18,14 @@ public class Item implements Serializable{
 	private Date dueDateTime;
 	private QuantityMeasure measure;
 	
-	public enum QuantityMeasure{
-		LB, OUNCE, KG, GRAM, GALON, LITER, MILLI_LITER, ITEMS, KILO_METER, METER, MILLI_METER, MILE, YARD, INCH
+	public enum QuantityMeasure {
+		ITEMS, LB, OUNCE, KG, GRAM, GALON, LITER, MILLI_LITER, METER, MILLI_METER, YARD, INCH;
 	}
 	
 	
 	public Item(String name, int icon, String quantity, Store store, double price, String note, boolean purchaseState, Date dueDateTime, QuantityMeasure measure ) {
 		super();
+		this.id = UUID.randomUUID();
 		this.name = name;
 		this.icon = icon;
 		this.quantity = quantity;
@@ -104,6 +108,16 @@ public class Item implements Serializable{
 
 	public void setMeasure(QuantityMeasure measure) {
 		this.measure = measure;
+	}
+
+
+	public UUID getItemId() {
+		return id;
+	}
+
+
+	public void setItemId(UUID itemId) {
+		this.id = itemId;
 	}
 
 
