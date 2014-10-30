@@ -57,8 +57,8 @@
 	    </activity>
 	    
 	    <provider
-            android:name="com.info.st.persistence.CartItemsContentProvider"
-            android:authorities="com.info.st.smartcart.items.contentprovider" >
+            android:name="com.info.st.persistence.SmartCartContentProvider"
+            android:authorities="com.info.st.smartcart.contentprovider" >
         </provider>
     </application>
 

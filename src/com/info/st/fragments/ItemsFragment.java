@@ -26,8 +26,9 @@ import android.widget.TextView;
 
 import com.info.st.activities.ItemDetailsActivity;
 import com.info.st.models.Item;
-import com.info.st.persistence.CartItemsContentProvider;
-import com.info.st.persistence.CartItemsTable;
+import com.info.st.persistence.SmartCartContentProvider;
+import com.info.st.persistence.cartitems.CartItemsTable;
+import com.info.st.persistence.masteritems.MasterItemsTable;
 import com.info.st.smartcart.R;
 
 
@@ -41,8 +42,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	List<Item> items;
 	
 	SimpleCursorAdapter adapter;
-	
-	Loader contentLoader;
+
 	
 	public ItemsFragment(List<Item> items) {
 		super();
@@ -62,11 +62,11 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	
 	private void fillData() {
 
-	    String[] from = new String[] { CartItemsTable.COLUMN_NAME, CartItemsTable.COLUMN_ICON, CartItemsTable.COLUMN_PURCHASE_STATE };
+	    String[] from = new String[] { MasterItemsTable.COLUMN_NAME, MasterItemsTable.COLUMN_ICON, CartItemsTable.COLUMN_PURCHASE_STATE };
 		// Fields on the UI to which we map
 		int[] to = new int[] { R.id.label, R.id.icon, R.id.itempurchasesate };
 
-		contentLoader = getLoaderManager().initLoader(0, null, this);
+		getLoaderManager().initLoader(0, null, this);
 		adapter = new SimpleCursorAdapter(getActivity(), R.layout.item_fragment, null, from,
 				to, 0);
 		SimpleCursorAdapter.ViewBinder viewBinder = new CustomCursorViewBinder();
@@ -85,8 +85,8 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	public boolean onItemLongClick(AdapterView<?> viewGroup, View view, int position, long id) {
 		//Show item details view
 		Intent i = new Intent(getActivity(), ItemDetailsActivity.class);
-		Uri todoUri = Uri.parse(CartItemsContentProvider.CONTENT_URI + "/" + id);
-		i.putExtra(CartItemsContentProvider.CONTENT_ITEM_TYPE, todoUri);
+		Uri cartItemUri = Uri.parse(SmartCartContentProvider.CART_ITEMS_CONTENT_URI + "/" + id);
+		i.putExtra(SmartCartContentProvider.CONTENT_ITEM_TYPE, cartItemUri);
 
 		startActivity(i);
 		return true;
@@ -99,7 +99,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 		CheckBox cb = (CheckBox)view.findViewById(R.id.itempurchasesate);
 		boolean itemPurchaseState = cb.isChecked();
 		
-		Uri todoUri = Uri.parse(CartItemsContentProvider.CONTENT_URI + "/" + id);		
+		Uri itemUri = Uri.parse(SmartCartContentProvider.CART_ITEMS_CONTENT_URI + "/" + id);		
 		ContentValues values = new ContentValues();
 		if (itemPurchaseState) {
 			//current state true. Change to false, persist data,
@@ -109,7 +109,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 			values.put(CartItemsTable.COLUMN_PURCHASE_STATE, "true");
 		}		
 		
-		getActivity().getContentResolver().update(todoUri, values, null, null);
+		getActivity().getContentResolver().update(itemUri, values, null, null);
 		
 		getLoaderManager().restartLoader(0, null, this);
 		
@@ -117,13 +117,14 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		String[] projection = { CartItemsTable.COLUMN_ID,
-				CartItemsTable.COLUMN_ICON, CartItemsTable.COLUMN_NAME,
-				CartItemsTable.COLUMN_NOTE, CartItemsTable.COLUMN_DUE_DATE_TIME,
-				CartItemsTable.COLUMN_PURCHASE_STATE, CartItemsTable.COLUMN_QUANTITY,
-				CartItemsTable.COLUMN_QUANTITY_MEASURE };
+		String[] projection = { "cartitems."+CartItemsTable.COLUMN_ID + " as _id", CartItemsTable.COLUMN_DUE_DATE_TIME,
+				CartItemsTable.COLUMN_PURCHASE_STATE,
+				MasterItemsTable.COLUMN_ICON, MasterItemsTable.COLUMN_NAME,
+				MasterItemsTable.COLUMN_NOTE,  MasterItemsTable.COLUMN_QUANTITY,
+				MasterItemsTable.COLUMN_QUANTITY_MEASURE , "masteritems."+MasterItemsTable.COLUMN_ID + " as item_id"};
 		CursorLoader cursorLoader = new CursorLoader(getActivity(),
-				CartItemsContentProvider.CONTENT_URI, projection, null, null, CartItemsTable.COLUMN_PURCHASE_STATE + " ASC");
+				SmartCartContentProvider.CART_ITEMS_CONTENT_URI, projection, null, null, CartItemsTable.COLUMN_PURCHASE_STATE + " ASC, " + CartItemsTable.COLUMN_CREATION_DATE + " DESC");
+		
 		return cursorLoader;
 	}
 
@@ -156,7 +157,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	    			((TextView)view).setPaintFlags(((TextView)view).getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
 	    		}
 	    		
-	    		((TextView)view).setText(cursor.getString(cursor.getColumnIndex(CartItemsTable.COLUMN_NAME)));
+	    		((TextView)view).setText(cursor.getString(cursor.getColumnIndex(MasterItemsTable.COLUMN_NAME)));
 	    		return true;
 	    	}
 	    	return false;

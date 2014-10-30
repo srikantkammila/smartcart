@@ -26,15 +26,17 @@ import com.info.st.adapters.StoreSpinnerListAdapter;
 import com.info.st.data.aggregators.StoreAggregator;
 import com.info.st.models.Item;
 import com.info.st.models.Store;
-import com.info.st.persistence.CartItemsContentProvider;
-import com.info.st.persistence.CartItemsTable;
+import com.info.st.persistence.SmartCartContentProvider;
+import com.info.st.persistence.cartitems.CartItemsTable;
+import com.info.st.persistence.masteritems.MasterItemsTable;
 import com.info.st.smartcart.R;
 
 public class ItemDetailsActivity extends Activity {
 
 	private View view;
 	private Spinner quantitySpinner, storeSpinner;
-	private Uri todoUri;
+	private Uri cartItemUri;
+	private int masterItemId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,24 +54,25 @@ public class ItemDetailsActivity extends Activity {
 		addUpdateButtonHandler();
 		
 		// check from the saved Instance
-		todoUri = (savedInstanceState == null) ? null : (Uri) savedInstanceState
-				.getParcelable(CartItemsContentProvider.CONTENT_ITEM_TYPE);
+		cartItemUri = (savedInstanceState == null) ? null : (Uri) savedInstanceState
+				.getParcelable(SmartCartContentProvider.CONTENT_ITEM_TYPE);
 
 		// Or passed from the other activity
 		if (extras != null) {
-			todoUri = extras
-					.getParcelable(CartItemsContentProvider.CONTENT_ITEM_TYPE);
+			cartItemUri = extras
+					.getParcelable(SmartCartContentProvider.CONTENT_ITEM_TYPE);
 
-			fillData(todoUri);
+			fillData(cartItemUri);
 		}
 	}
 	
 	private void fillData(Uri uri) {
-		String[] projection = {  CartItemsTable.COLUMN_ID,
-				CartItemsTable.COLUMN_ICON, CartItemsTable.COLUMN_NAME,
-				CartItemsTable.COLUMN_NOTE, CartItemsTable.COLUMN_DUE_DATE_TIME,
-				CartItemsTable.COLUMN_PURCHASE_STATE, CartItemsTable.COLUMN_QUANTITY, CartItemsTable.COLUMN_QUANTITY_MEASURE};
-		
+		String[] projection = {   "cartitems." + CartItemsTable.COLUMN_ID,
+				 CartItemsTable.COLUMN_DUE_DATE_TIME,
+				CartItemsTable.COLUMN_PURCHASE_STATE, 
+				MasterItemsTable.COLUMN_ICON, MasterItemsTable.COLUMN_NAME,
+				MasterItemsTable.COLUMN_NOTE, MasterItemsTable.COLUMN_QUANTITY, 
+				MasterItemsTable.COLUMN_QUANTITY_MEASURE, "masteritems."+MasterItemsTable.COLUMN_ID + " as item_id "};		
 		
 		EditText nameView = (EditText)this.findViewById(R.id.itemname);
 		ImageView iconView = (ImageView)this.findViewById(R.id.itemimage);
@@ -86,7 +89,7 @@ public class ItemDetailsActivity extends Activity {
 		if (cursor != null) {
 			cursor.moveToFirst();
 			String quantityMeasure = cursor.getString(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_QUANTITY_MEASURE));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_QUANTITY_MEASURE));
 
 			for (int i = 0; i < measureSpinner.getCount(); i++) {
 
@@ -97,22 +100,25 @@ public class ItemDetailsActivity extends Activity {
 			}
 
 			nameView.setText(cursor.getString(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_NAME)));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_NAME)));
 			noteView.setText(cursor.getString(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_NOTE)));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_NOTE)));
 			quantityView.setText(cursor.getString(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_QUANTITY)));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_QUANTITY)));
 			long dateTime = cursor.getLong(cursor
 					.getColumnIndexOrThrow(CartItemsTable.COLUMN_DUE_DATE_TIME));
 			Date dt = new Date(dateTime);
 			DateFormat dateFormat = DateFormat.getDateTimeInstance();
 			dueDateTimeView.setText(dateFormat.format(dt));
 			iconView.setImageResource(cursor.getInt(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_ICON)));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_ICON)));
 			
 			//update title for the activity
 			setTitle(cursor.getString(cursor
-					.getColumnIndexOrThrow(CartItemsTable.COLUMN_NAME)));
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_NAME)));
+			
+			//master item ID. Use alias as the peoject has alias name
+			masterItemId = cursor.getInt(cursor.getColumnIndexOrThrow("item_id"));
 
 			// always close the cursor
 			cursor.close();
@@ -264,7 +270,7 @@ public class ItemDetailsActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				
+				saveState();
 				setResult(RESULT_OK);
 				finish();
 //				EditText nameView = (EditText)activity.findViewById(R.id.itemname);
@@ -296,14 +302,14 @@ public class ItemDetailsActivity extends Activity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		saveState();
-		outState.putParcelable(CartItemsContentProvider.CONTENT_ITEM_TYPE, todoUri);
+		outState.putParcelable(SmartCartContentProvider.CONTENT_ITEM_TYPE, cartItemUri);
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		saveState();
-	}
+//	@Override
+//	protected void onPause() {
+//		super.onPause();
+//		saveState();
+//	}
 
 	private void saveState() {
 		ItemDetailsActivity activity = this;
@@ -332,26 +338,36 @@ public class ItemDetailsActivity extends Activity {
 				e.printStackTrace();
 			}
 			
-		}
+		}	
 
+		//cart item table values
+		ContentValues cartValues = new ContentValues();		
+		cartValues.put(CartItemsTable.COLUMN_PURCHASE_STATE, "false");
+		cartValues.put(CartItemsTable.COLUMN_DUE_DATE_TIME, dueDateTime);
 		
-
-		ContentValues values = new ContentValues();
-		values.put(CartItemsTable.COLUMN_NAME, name);
-		values.put(CartItemsTable.COLUMN_PURCHASE_STATE, "false");
-		values.put(CartItemsTable.COLUMN_QUANTITY, quantity);
-		values.put(CartItemsTable.COLUMN_QUANTITY_MEASURE, measure);
-		values.put(CartItemsTable.COLUMN_NOTE, note);
-		values.put(CartItemsTable.COLUMN_ICON, R.drawable.ic_launcher);
-		values.put(CartItemsTable.COLUMN_DUE_DATE_TIME, dueDateTime);
-
-		if (todoUri == null) {
+		//master item table values
+		ContentValues masterValues = new ContentValues();
+		masterValues.put(MasterItemsTable.COLUMN_QUANTITY, quantity);
+		masterValues.put(MasterItemsTable.COLUMN_QUANTITY_MEASURE, measure);
+		masterValues.put(MasterItemsTable.COLUMN_NOTE, note);
+		masterValues.put(MasterItemsTable.COLUMN_ICON, R.drawable.ic_launcher);
+		masterValues.put(MasterItemsTable.COLUMN_NAME, name);
+		
+		
+		if (cartItemUri == null) {
 			// New item
-			todoUri = getContentResolver().insert(
-					CartItemsContentProvider.CONTENT_URI, values);
+			//Create master item table entry
+			cartItemUri = getContentResolver().insert(
+					SmartCartContentProvider.MASTER_ITEMS_CONTENT_URI, masterValues);
+			String masterId = cartItemUri.getLastPathSegment();
+			cartValues.put(CartItemsTable.MASTER_ITEM_ID, masterId);
+			cartItemUri = getContentResolver().insert(
+					SmartCartContentProvider.CART_ITEMS_CONTENT_URI, cartValues);
 		} else {
 			// Update item
-			getContentResolver().update(todoUri, values, null, null);
+			getContentResolver().update(cartItemUri, cartValues, null, null);
+			Uri masterItemUri = Uri.parse(SmartCartContentProvider.MASTER_ITEMS_CONTENT_URI + "/" + masterItemId);
+			getContentResolver().update(masterItemUri, masterValues, null, null);
 		}
 	}
 
