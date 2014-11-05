@@ -1,9 +1,7 @@
 package com.info.st.fragments;
 
-import java.util.List;
-import java.util.Random;
-
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Paint;
@@ -21,14 +19,18 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.info.st.activities.ItemDetailsActivity;
-import com.info.st.models.Item;
+import com.info.st.activities.StoreItemListActivity;
+import com.info.st.common.DialogHandler;
 import com.info.st.persistence.SmartCartContentProvider;
 import com.info.st.persistence.cartitems.CartItemsTable;
 import com.info.st.persistence.masteritems.MasterItemsTable;
+import com.info.st.persistence.store.StoresTable;
 import com.info.st.smartcart.R;
 
 
@@ -38,23 +40,22 @@ import com.info.st.smartcart.R;
  * create an instance of this fragment.
  *
  */
-public class ItemsFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, MainTabFragment, OnItemLongClickListener, OnItemClickListener{
-	List<Item> items;
-	
-	SimpleCursorAdapter adapter;
+public class ItemsFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnItemLongClickListener, OnItemClickListener{
 
 	
-	public ItemsFragment(List<Item> items) {
+	SimpleCursorAdapter adapter;
+	
+	boolean showDeleteButton = false;
+
+	
+	public ItemsFragment() {
 		super();
-		this.items = items;
 	}
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 	    super.onActivityCreated(savedInstanceState);
-//	    List<Item> displayItems = (List<Item>)getActivity().getIntent().getExtras().get("DisplayItems");
-//		ItemListAdapter adapter = new ItemListAdapter(getActivity(), items);
-//	    setListAdapter(adapter);
+	    System.out.println("****************activity created"); 
 	    fillData();
 	    getListView().setOnItemLongClickListener(this);
 	    getListView().setOnItemClickListener(this);
@@ -67,7 +68,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 		int[] to = new int[] { R.id.label, R.id.icon, R.id.itempurchasesate };
 
 		getLoaderManager().initLoader(0, null, this);
-		adapter = new SimpleCursorAdapter(getActivity(), R.layout.item_fragment, null, from,
+		adapter = new CustomCursorAdapter(getActivity(), R.layout.item_fragment, null, from,
 				to, 0);
 		SimpleCursorAdapter.ViewBinder viewBinder = new CustomCursorViewBinder();
 		adapter.setViewBinder(viewBinder);
@@ -77,8 +78,30 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {		
-	    return inflater.inflate(R.layout.item_list, null, false);	    
+			Bundle savedInstanceState) {
+		System.out.println("****************create view"); 
+	    View view =inflater.inflate(R.layout.item_list, container, false);	    
+	    
+	    return view;
+	}
+	
+	@Override
+	public View getView() {
+		// TODO Auto-generated method stub
+		System.out.println("****************get view"); 
+		return super.getView();		
+	}
+	
+	@Override
+	public void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+	}
+	
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
 	}
 
 	@Override
@@ -95,7 +118,6 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	@Override
 	public void onItemClick(AdapterView<?> viewGroup, View view, int position, long id) {
 		//Mark item as purchased and update DB
-		System.out.println("***************view: " + view);
 		CheckBox cb = (CheckBox)view.findViewById(R.id.itempurchasesate);
 		boolean itemPurchaseState = cb.isChecked();
 		
@@ -140,7 +162,7 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	}
 	
 	
-	private class CustomCursorViewBinder implements SimpleCursorAdapter.ViewBinder{
+	private class CustomCursorViewBinder implements SimpleCursorAdapter.ViewBinder {
 		
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
@@ -158,12 +180,105 @@ public class ItemsFragment extends ListFragment implements LoaderManager.LoaderC
 	    		}
 	    		
 	    		((TextView)view).setText(cursor.getString(cursor.getColumnIndex(MasterItemsTable.COLUMN_NAME)));
+	    		
 	    		return true;
 	    	}
 	    	return false;
 		}
 		
 	}
+	
+	public void toggleBeleteButton (boolean hide) {
+		showDeleteButton = hide;		
+	}
+	
+	public class CustomCursorAdapter extends SimpleCursorAdapter {
+		
+		private boolean hideDeleteButton = true; //default, Hide button 
+
+		public CustomCursorAdapter(Context context, int layout, Cursor c,
+				String[] from, int[] to, int flags) {
+			super(context, layout, c, from, to, flags);			
+			// TODO Auto-generated constructor stub
+		}
+		
+		@Override
+		public void bindView(View view, Context context, final Cursor cursor) {
+			// TODO Auto-generated method stub
+			System.out.println("*** Cursor adapter bind view");
+			super.bindView(view, context, cursor);
+			
+			ImageButton imgb = (ImageButton)view.findViewById(R.id.deletebutton);
+			ImageView icon = (ImageView)view.findViewById(R.id.icon);
+			if (hideDeleteButton) {
+				//true.
+				imgb.setVisibility(View.INVISIBLE);
+				icon.setVisibility(View.VISIBLE);
+			} else {
+				//false.
+				imgb.setVisibility(View.VISIBLE);
+				icon.setVisibility(View.INVISIBLE);
+			}
+			imgb.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					deleteConfirm();
+					
+				}
+				
+			    public void deleteConfirm() {
+			    	cursor.moveToFirst();
+	            	String name = cursor.getString(cursor.getColumnIndex(MasterItemsTable.COLUMN_NAME));
+			        DialogHandler appdialog = new DialogHandler();
+			        boolean dlg = appdialog.Confirm(getActivity(), "Delete: " + name + " ?", "Do you want to delete : " + name + " from the list?",
+			                "Cancel", "OK", okRun(), cancelRun());
+			       
+			    }
+
+			    public Runnable okRun(){
+			    	return new Runnable() {
+			            public void run() {
+			            	int id = cursor.getInt(cursor.getColumnIndex(CartItemsTable.COLUMN_ID));
+							Uri itemUri = Uri.parse(SmartCartContentProvider.CART_ITEMS_CONTENT_URI + "/" + id);
+							getActivity().getContentResolver().delete(itemUri, null, null);
+							CustomCursorAdapter.this.notifyDataSetChanged();
+			            }
+			          };
+			    }
+
+			    public Runnable cancelRun(){
+			    	return new Runnable() {
+			            public void run() {
+			                System.out.println("Test This from cancel");
+			            }
+			          };
+			    }
+			});
+		}
+		
+		public boolean isHideDeleteButton() {
+			return hideDeleteButton;
+		}
+
+		public void toggleHideDeleteButton() {
+			if (this.hideDeleteButton) {
+				this.hideDeleteButton = false;
+			} else {
+				this.hideDeleteButton = true;
+			}			
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			View view = super.getView(position, convertView, parent);
+			return view;
+		}
+		
+	}
+	
+
 
 
 }

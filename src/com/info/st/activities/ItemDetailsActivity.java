@@ -11,24 +11,29 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.MergeCursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 
-import com.info.st.adapters.StoreSpinnerListAdapter;
-import com.info.st.data.aggregators.StoreAggregator;
 import com.info.st.models.Item;
 import com.info.st.models.Store;
 import com.info.st.persistence.SmartCartContentProvider;
+import com.info.st.persistence.SmartCartDBHelper;
 import com.info.st.persistence.cartitems.CartItemsTable;
 import com.info.st.persistence.masteritems.MasterItemsTable;
+import com.info.st.persistence.store.StoresTable;
 import com.info.st.smartcart.R;
 
 public class ItemDetailsActivity extends Activity {
@@ -37,21 +42,14 @@ public class ItemDetailsActivity extends Activity {
 	private Spinner quantitySpinner, storeSpinner;
 	private Uri cartItemUri;
 	private int masterItemId;
+	private long itemStoreId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.item_details);
 		
-		Bundle extras = getIntent().getExtras();		
-		
-		addDateTimePicker();
-		
-		addItemsOnQuantitySpinner();
-		
-		addItemsOnStoreSpinner();
-		
-		addUpdateButtonHandler();
+		Bundle extras = getIntent().getExtras();
 		
 		// check from the saved Instance
 		cartItemUri = (savedInstanceState == null) ? null : (Uri) savedInstanceState
@@ -61,15 +59,25 @@ public class ItemDetailsActivity extends Activity {
 		if (extras != null) {
 			cartItemUri = extras
 					.getParcelable(SmartCartContentProvider.CONTENT_ITEM_TYPE);
+			
+			itemStoreId = extras.getLong("SelectStoreId");
 
 			fillData(cartItemUri);
 		}
+		
+		addDateTimePicker();
+		
+		addItemsOnQuantitySpinner();
+		
+		addStoreSpinner();
+		
+		addUpdateButtonHandler();
 	}
 	
 	private void fillData(Uri uri) {
 		String[] projection = {   "cartitems." + CartItemsTable.COLUMN_ID,
 				 CartItemsTable.COLUMN_DUE_DATE_TIME,
-				CartItemsTable.COLUMN_PURCHASE_STATE, 
+				CartItemsTable.COLUMN_PURCHASE_STATE, MasterItemsTable.COLUMN_STORE_ID,
 				MasterItemsTable.COLUMN_ICON, MasterItemsTable.COLUMN_NAME,
 				MasterItemsTable.COLUMN_NOTE, MasterItemsTable.COLUMN_QUANTITY, 
 				MasterItemsTable.COLUMN_QUANTITY_MEASURE, "masteritems."+MasterItemsTable.COLUMN_ID + " as item_id "};		
@@ -84,8 +92,8 @@ public class ItemDetailsActivity extends Activity {
 		String dueDateTime = (String)dueDateTimeView.getTag();
 		
 		
-		Cursor cursor = getContentResolver().query(uri, projection, null, null,
-				null);
+		Cursor cursor = (uri != null) ? getContentResolver().query(uri, projection, null, null,
+				null) : null;
 		if (cursor != null) {
 			cursor.moveToFirst();
 			String quantityMeasure = cursor.getString(cursor
@@ -107,6 +115,8 @@ public class ItemDetailsActivity extends Activity {
 					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_QUANTITY)));
 			long dateTime = cursor.getLong(cursor
 					.getColumnIndexOrThrow(CartItemsTable.COLUMN_DUE_DATE_TIME));
+			itemStoreId = cursor.getLong(cursor
+					.getColumnIndexOrThrow(MasterItemsTable.COLUMN_STORE_ID));
 			Date dt = new Date(dateTime);
 			DateFormat dateFormat = DateFormat.getDateTimeInstance();
 			dueDateTimeView.setText(dateFormat.format(dt));
@@ -249,17 +259,58 @@ public class ItemDetailsActivity extends Activity {
 	
 	
 	// add items into spinner dynamically
-	public void addItemsOnStoreSpinner() {
+	public void addStoreSpinner() {
 
 		storeSpinner = (Spinner) findViewById(R.id.storespinner);
-		StoreSpinnerListAdapter dataAdapter = new StoreSpinnerListAdapter(this, android.R.layout.simple_spinner_item, new StoreAggregator().getInitStores());
-//		ArrayAdapter<Store> dataAdapter = new ArrayAdapter<Store>(this, android.R.layout.simple_spinner_item, new StoreAggregator().getInitStores());
-		dataAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		storeSpinner.setAdapter(dataAdapter);
-		storeSpinner.setSelection(dataAdapter.getCount());
+		storeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id) {
+				//Set selected store for this item
+				if (id > -1) {
+					itemStoreId = id;
+				}
+				
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+			}
+		});
 		
-//		storeSpinner.setOnItemSelectedListener(listener);
+	    String[] from = new String[] { StoresTable.COLUMN_NAME, StoresTable.COLUMN_ID };
+		// Fields on the UI to which we map
+		int[] to = new int[] { android.R.id.text1};
+		
+		SQLiteDatabase sdb = new SmartCartDBHelper(this).getWritableDatabase();
+		Cursor dbCursor = sdb.query(StoresTable.TABLE_STORES, from, null, null, null, null, null);
+		MatrixCursor defaultValueCursor = new MatrixCursor(new String[] { StoresTable.COLUMN_NAME, StoresTable.COLUMN_ID });
+		defaultValueCursor.addRow(new String[] {"Select Store", "-1"});
+		Cursor[] cursors = {defaultValueCursor, dbCursor};
+		MergeCursor mergeCursor = new MergeCursor(cursors);
+
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, mergeCursor, from,
+				to, 0);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		storeSpinner.setAdapter(adapter);
+		
+		if (itemStoreId > -1) {
+			mergeCursor.moveToFirst();
+	        for(int i = 0; i < mergeCursor.getCount(); i++)
+	        {
+	        	mergeCursor.moveToPosition(i);
+	            if (mergeCursor.getLong(mergeCursor.getColumnIndex(StoresTable.COLUMN_ID)) == itemStoreId )
+	            {
+	            	
+	            	storeSpinner.setSelection(i); //(false is optional)
+	                break;
+	            }
+	        } 
+		}
+
+		
+		
 		
 	}
 	
@@ -273,25 +324,6 @@ public class ItemDetailsActivity extends Activity {
 				saveState();
 				setResult(RESULT_OK);
 				finish();
-//				EditText nameView = (EditText)activity.findViewById(R.id.itemname);
-//				String name = nameView.getText().toString();
-//				EditText noteView = (EditText)activity.findViewById(R.id.itemnote);
-//				String note = noteView.getText().toString();
-//				EditText quantityView = (EditText)activity.findViewById(R.id.itemquantity);
-//				String quantity = quantityView.getText().toString();
-//				Spinner measureSpinner = (Spinner)activity.findViewById(R.id.quantitymeasure);
-//				String measure = measureSpinner.getSelectedItem().toString();
-//				Spinner storeSpinner = (Spinner)activity.findViewById(R.id.storespinner);
-//				Store store = (Store)storeSpinner.getSelectedItem();
-//				
-//				EditText dueDateTimeView = (EditText)activity.findViewById(R.id.itemduedate);
-//				String dueDateTime = dueDateTimeView.getText().toString();
-//				
-//				Item newItem = new Item(name, R.drawable.ic_launcher, quantity, store, 0, note, false, new Date(), Item.QuantityMeasure.GALON);
-//				
-//				System.out.println("name: " + name +  " note: " + note + " quantity: "+ quantity + " " + measure + " due:" + dueDateTime);
-//				ItemHistoryAggregator.getInstance().addItem(newItem);
-//				activity.finish();
 			}
 		});
 		
@@ -322,8 +354,8 @@ public class ItemDetailsActivity extends Activity {
 		String quantity = quantityView.getText().toString();
 		Spinner measureSpinner = (Spinner)activity.findViewById(R.id.quantitymeasure);
 		String measure = measureSpinner.getSelectedItem().toString();
-		Spinner storeSpinner = (Spinner)activity.findViewById(R.id.storespinner);
-		Store store = (Store)storeSpinner.getSelectedItem();		
+//		Spinner storeSpinner = (Spinner)activity.findViewById(R.id.storespinner);
+//		Store store = (Store)storeSpinner.getSelectedItem();		
 		EditText dueDateTimeView = (EditText)activity.findViewById(R.id.itemduedate);
 		final String dueDateTimeStr = dueDateTimeView.getText().toString();	
 		DateFormat df = DateFormat.getDateTimeInstance();
@@ -352,6 +384,12 @@ public class ItemDetailsActivity extends Activity {
 		masterValues.put(MasterItemsTable.COLUMN_NOTE, note);
 		masterValues.put(MasterItemsTable.COLUMN_ICON, R.drawable.ic_launcher);
 		masterValues.put(MasterItemsTable.COLUMN_NAME, name);
+		if (itemStoreId > -1) {
+			masterValues.put(MasterItemsTable.COLUMN_STORE_ID, itemStoreId);
+		} else {
+			masterValues.putNull(MasterItemsTable.COLUMN_STORE_ID);
+		}
+		
 		
 		
 		if (cartItemUri == null) {

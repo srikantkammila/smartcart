@@ -55,6 +55,14 @@
 	            android:name="android.support.PARENT_ACTIVITY"
 	            android:value="ccom.info.st.activities.SelectItemGridActivity" />
 	    </activity>
+	    <activity
+	        android:name="com.info.st.activities.StoreDetailsActivity"
+	        android:label="@string/title_edit_item_details_activity"
+	        android:parentActivityName="com.info.st.smartcart.MainActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="com.info.st.smartcart.MainActivity" />
+	    </activity>
 	    
 	    <provider
             android:name="com.info.st.persistence.SmartCartContentProvider"

@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="48dp"
-    android:padding="5dp">    
+    android:padding="5dp"
+    android:descendantFocusability="blocksDescendants">    
     
     <ImageView
         android:id="@+id/icon"
@@ -13,14 +14,25 @@
         android:layout_marginTop="4px"
          >
     </ImageView>
+    
+    <ImageButton 
+        android:id="@+id/deletebutton"
+        android:layout_width="22px"
+        android:layout_height="22px"
+        android:layout_marginLeft="4px"
+        android:layout_marginRight="10px"
+        android:layout_marginTop="4px"
+        android:visibility="visible"
+        android:background="@drawable/delete"
+        />
 
     <TextView
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        android:layout_toRightOf="@id/icon"
-        android:layout_marginTop="10dp" >
+        android:layout_toRightOf="@id/deletebutton"
+        android:layout_marginTop="4px" >
     </TextView>
     
     <CheckBox

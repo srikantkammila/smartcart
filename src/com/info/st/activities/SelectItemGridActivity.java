@@ -9,7 +9,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,9 +18,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.info.st.data.aggregators.ItemAggregator;
-import com.info.st.data.aggregators.ItemHistoryAggregator;
-import com.info.st.models.Item;
 import com.info.st.persistence.SmartCartContentProvider;
 import com.info.st.persistence.cartitems.CartItemsTable;
 import com.info.st.persistence.masteritems.MasterItemsTable;
@@ -85,10 +81,14 @@ public class SelectItemGridActivity extends Activity implements LoaderManager.Lo
 				
 				addItemInCart(masterItemId);
 				
+				getLoaderManager().restartLoader(0, null, this);
+				
 				String  displayMsg = "Item : " + ((TextView) view.findViewById(R.id.grid_item_label))
 						   .getText() + " added to cart";
 				Toast.makeText(
-				   getApplicationContext(), displayMsg, Toast.LENGTH_LONG).show();
+				   getApplicationContext(), displayMsg, Toast.LENGTH_SHORT).show();
+				
+				
 			}
 
 		}
@@ -115,9 +115,7 @@ public class SelectItemGridActivity extends Activity implements LoaderManager.Lo
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		String[] projection = { MasterItemsTable.COLUMN_ICON, MasterItemsTable.COLUMN_NAME,
-				MasterItemsTable.COLUMN_NOTE,  MasterItemsTable.COLUMN_QUANTITY,
-				MasterItemsTable.COLUMN_QUANTITY_MEASURE, MasterItemsTable.COLUMN_ID};
+		String[] projection = MasterItemsTable.projection;
 		CursorLoader cursorLoader = new CursorLoader(this,
 				SmartCartContentProvider.MASTER_ITEMS_CONTENT_URI, projection, null, null, null);
 		

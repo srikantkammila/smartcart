@@ -1,58 +1,61 @@
 package com.info.st.smartcart;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.SimpleCursorAdapter;
 
 import com.info.st.activities.SelectItemGridActivity;
-import com.info.st.activities.StoreItemListActivity;
+import com.info.st.activities.StoreDetailsActivity;
 import com.info.st.adapters.TablistAdapter;
-import com.info.st.data.aggregators.ItemAggregator;
-import com.info.st.data.aggregators.StoreAggregator;
+import com.info.st.fragments.ItemsFragment;
+import com.info.st.fragments.StoresFragment;
 
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 
 	private ViewPager viewPager;
     private TablistAdapter mAdapter;
     private ActionBar actionBar;
+//    private boolean deleteButtonActive = false;
+    private List<Tab> mainTabs = new ArrayList<Tab>();
     // Tab titles
-    private String[] tabs = { "Stores", "Items"};
+    private String[] tabs = { "Items", "Stores" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+//        actionBar.setDisplayShowTitleEnabled(false);
 
         // Initilization
         viewPager = (ViewPager) findViewById(R.id.pager);
         actionBar = getActionBar();
         
+
         
-        StoreAggregator storeAg = new StoreAggregator();
-//        getIntent().putExtra("StoreAggregator", storeAg);
-//        Bundle bundle = new Bundle();
-//        bundle.putSerializable("DisplayStores", (ArrayList<Store>)storeAg.getInitStores());
-        
-        ItemAggregator itemAg = ItemAggregator.getInstance();
-//        bundle.putSerializable("DisplayItems", (ArrayList<Item>)itemAg.getInitItems());
-//        getIntent().putExtras(bundle);
-        
-        mAdapter = new TablistAdapter(getSupportFragmentManager(), itemAg.getInitItems(), storeAg.getInitStores());
+        mAdapter = new TablistAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mAdapter);
 //        actionBar.setHomeButtonEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         // Adding Tabs
         for (String tab_name : tabs) {
-            actionBar.addTab(actionBar.newTab().setText(tab_name)
-                    .setTabListener(this));
+        	Tab t = actionBar.newTab();
+        	t.setText(tab_name).setTabListener(this);
+            actionBar.addTab(t);
+            this.mainTabs.add(t);
         }
 
         /**
@@ -118,6 +121,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	        case R.id.action_add_store:
 	        	startAddStoreActivity();
 	            return true;
+	        case R.id.action_delete:
+	        	startDeleteActivity();
+	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -125,28 +131,34 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	
 	private void startAddItemActivity () {
 		Intent itemGridIntent = new Intent(this, SelectItemGridActivity.class);
-		startActivity(itemGridIntent);
-		
+		startActivity(itemGridIntent);		
 	}
 	
 	private void startAddStoreActivity () {
-		
+		Intent itemGridIntent = new Intent(this, StoreDetailsActivity.class);
+		startActivity(itemGridIntent);
 	}
 	
-	
-//	@Override
-//	public void onBackPressed() {
-//		// TODO Auto-generated method stub
-//		System.out.println("##############################Back Pressed");
-//		if(viewPager.getCurrentItem() == 0) {
-//            if (mAdapter.getItem(0) instanceof StoreItemsFragment) {
-//                ((StoreItemsFragment) mAdapter.getItem(0)).backPressed();
-//            }
-//            else if (mAdapter.getItem(0) instanceof MainTabFragment) {
-//                finish();
-//            }
-//        }
-//	}
+	private void startDeleteActivity () {
+//		if (this.deleteButtonActive) {
+//			this.deleteButtonActive = false;
+//		} else {
+//			this.deleteButtonActive = true;
+//		}
+		
+		for (int i=0; i<mAdapter.getCount(); i++) {
+			ListFragment ims = (ListFragment)mAdapter.getItem(i);
+			if (ims instanceof ItemsFragment) {
+				((ItemsFragment.CustomCursorAdapter)ims.getListAdapter()).toggleHideDeleteButton();
+				((SimpleCursorAdapter)ims.getListAdapter()).notifyDataSetChanged();
+			} else if (ims instanceof StoresFragment) {
+				((StoresFragment.CustomCursorAdapter)ims.getListAdapter()).toggleHideDeleteButton();
+				((SimpleCursorAdapter)ims.getListAdapter()).notifyDataSetChanged();
+			}
+			
+		}
+
+	}
 	
 
 	

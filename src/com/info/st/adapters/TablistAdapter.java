@@ -15,16 +15,12 @@ import com.info.st.models.Store;
  * Created by Srikanth Kammila on 10/11/2014.
  */
 public class TablistAdapter extends FragmentPagerAdapter {
-	List<Item> items;
-	List<Store> stores;
 	FragmentManager fm;
 	Fragment fragPos1;
 	Fragment fragPos0;
 
-    public TablistAdapter(FragmentManager fm, List<Item> items, List<Store> stores) {
+    public TablistAdapter(FragmentManager fm) {
         super(fm);
-        this.items = items;
-        this.stores = stores;
         this.fm = fm;
     }
     
@@ -34,13 +30,13 @@ public class TablistAdapter extends FragmentPagerAdapter {
         switch (index) {
             case 0:
             	if (fragPos0 == null) {
-            		fragPos0 = new StoresFragment(this.stores);
+            		fragPos0 = new ItemsFragment();
             	}
                 return fragPos0;
                 
             case 1:
                 if (fragPos1 == null) {
-                	fragPos1 = new ItemsFragment(this.items);
+                	fragPos1 = new StoresFragment();
                 }
                 return fragPos1;
         }

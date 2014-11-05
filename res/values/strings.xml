@@ -7,15 +7,22 @@
     <string name="title_store_item_list">Store Items</string>
     <string name="title_item_details_activity">Item</string>
     <string name="title_select_item_grid_activity">Select Item</string>
-    <string name="title_edit_item_details_activity">New Item</string>
+    <string name="title_select_store_grid_activity">Select Store</string>
+    <string name="title_edit_item_details_activity">New Item</string>    
     <string name="add">Add</string>
+    <string name="delete">Delete</string>
     <string name="add_item">Add Item</string>
+    <string name="delete_item">Delete Item</string>
     <string name="add_store">Add Store</string>
+    <string name="delete_store">Delete store</string>
     <string name="itemname">Item</string>
     <string name="itemnote">Note</string>
     <string name="itemquantity">Quantity</string>
     <string name="itemduedate">Item need by</string>
     <string name="store">Store</string>
+    <string name="storename">Name</string>
+    <string name="storenote">Note</string>
+    <string name="storeaddress">Address</string>
     
     
     
